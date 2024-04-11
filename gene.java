@@ -1,3 +1,3 @@
-public class gene {
+public class Gene {
 	
 }
