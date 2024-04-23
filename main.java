@@ -100,7 +100,28 @@ public class Main {
 			}
 		}
 	}
-
+	public static void lookupAminoAcid(String letter) {
+		ArrayList<String> aminoAcids = new ArrayList<String>();
+		// Add data to the aminoAcids list. Each string should contain the name, letter, and codons of an amino acid, separated by commas.
+		// For example: "Alanine,A,GCU,GCC,GCA,GCG"
+	
+		for (String data : aminoAcids) {
+			String[] details = data.split(",");
+			if (details[1].equalsIgnoreCase(letter)) {
+				System.out.println("Name: " + details[0]);
+				System.out.println("Letter: " + details[1]);
+				System.out.print("Codons: ");
+				for (int i = 2; i < details.length; i++) {
+					System.out.print(details[i] + " ");
+				}
+				System.out.println();
+				return;
+			}
+		}
+	
+		System.out.println("No amino acid found for the letter " + letter);
+	}
+	
 	public static void generateGeneReport(int readingFrame) {
 		// Implement this method
 	}
