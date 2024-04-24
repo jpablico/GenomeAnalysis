@@ -27,33 +27,34 @@ public class Main {
             }
         }
         return codons;
-    }
+	}
 
-    private static void findGenes(List<String> codons, int readingFrame) {
-        StringBuilder aminoAcidSequence = new StringBuilder();
-        int start = 0;
-        boolean isGene = false;
+	private static void findGenes(List<String> codons, int readingFrame) {
+		StringBuilder aminoAcidSequence = new StringBuilder();
+		int start = 0;
+		boolean isGene = false;
 
-        for (int i = 0; i < codons.size(); i++) {
-            String aminoAcid = translateCodonToAminoAcid(codons.get(i));
-            if (aminoAcid.equals("Start")) {
-                if (!isGene) {
-                    start = i;
-                    isGene = true;
-                    aminoAcidSequence = new StringBuilder();
-                }
-            } else if (aminoAcid.equals("Stop")) {
-                if (isGene && aminoAcidSequence.length() >= 50) {
-                    genes.add(new Gene(aminoAcidSequence.toString(), start, i));
-                }
-                isGene = false;
-            } else if (isGene) {
-                aminoAcidSequence.append(aminoAcid);
-            }
-        }
-    }
+		for (int i = 0; i < codons.size(); i++) {
+			String aminoAcid = translateCodonToAminoAcid(codons.get(i));
+			System.out.println("Codon: " + codons.get(i) + " -> Amino Acid: " + aminoAcid); // Print codon and translated amino acid
+			if (aminoAcid.equals("Start")) {
+				if (!isGene) {
+					start = i;
+					isGene = true;
+					aminoAcidSequence = new StringBuilder();
+				}
+			} else if (aminoAcid.equals("Stop")) {
+				if (isGene && aminoAcidSequence.length() >= 50) {
+					genes.add(new Gene(aminoAcidSequence.toString(), start, i));
+				}
+				isGene = false;
+			} else if (isGene) {
+				aminoAcidSequence.append(aminoAcid);
+			}
+		}
+	}
 
-    private static String translateCodonToAminoAcid(String codon) {
+	private static String translateCodonToAminoAcid(String codon) {
         for (Aminoacid acid : aminoAcids) {
             if (acid.getCodons().contains(codon)) {
                 return acid.getSingleLetterAbbreviation(); 
