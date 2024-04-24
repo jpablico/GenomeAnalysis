@@ -1,7 +1,6 @@
 import java.io.*;
 import java.util.*;
 
-
 public class Main {
 
     private static List<Aminoacid> aminoAcids;
@@ -18,7 +17,7 @@ public class Main {
         menuSelection();
     }
 
-    private static List<String> readCodons(String filename) throws IOException {
+	private static List<String> readCodons(String filename) throws IOException {
         List<String> codons = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
@@ -27,40 +26,41 @@ public class Main {
             }
         }
         return codons;
-	}
+    }
 
-	private static void findGenes(List<String> codons, int readingFrame) {
-		StringBuilder aminoAcidSequence = new StringBuilder();
-		int start = 0;
-		boolean isGene = false;
+    private static void findGenes(List<String> codons, int readingFrame) {
+        StringBuilder aminoAcidSequence = new StringBuilder();
+        int start = -1;
+        boolean isGene = false;
 
-		for (int i = 0; i < codons.size(); i++) {
-			String aminoAcid = translateCodonToAminoAcid(codons.get(i));
-			System.out.println("Codon: " + codons.get(i) + " -> Amino Acid: " + aminoAcid); // Print codon and translated amino acid
-			if (aminoAcid.equals("Start")) {
-				if (!isGene) {
-					start = i;
-					isGene = true;
-					aminoAcidSequence = new StringBuilder();
-				}
-			} else if (aminoAcid.equals("Stop")) {
-				if (isGene && aminoAcidSequence.length() >= 50) {
-					genes.add(new Gene(aminoAcidSequence.toString(), start, i));
-				}
-				isGene = false;
-			} else if (isGene) {
-				aminoAcidSequence.append(aminoAcid);
-			}
-		}
-	}
-
-	private static String translateCodonToAminoAcid(String codon) {
-        for (Aminoacid acid : aminoAcids) {
-            if (acid.getCodons().contains(codon)) {
-                return acid.getSingleLetterAbbreviation(); 
+        for (int i = 0; i < codons.size(); i++) {
+            String aminoAcid = translateCodonToAminoAcid(codons.get(i));
+            if ("Start".equals(aminoAcid) && !isGene) {
+                start = i; // Store the start index of the gene
+                isGene = true;
+                aminoAcidSequence = new StringBuilder(); // Start a new sequence
+            } else if ("Stop".equals(aminoAcid) && isGene) {
+                if (aminoAcidSequence.length() >= 50) { // Check to ensure gene length is adequate
+                    genes.add(new Gene(aminoAcidSequence.toString(), start * 3, i * 3));
+                }
+                isGene = false; // Reset for next possible gene
+            } else if (isGene) {
+                aminoAcidSequence.append(aminoAcid);
             }
         }
-        return "";
+    }
+    private static String translateCodonToAminoAcid(String codon) {
+        if (codon.equals("ATG")) {
+            return "Start"; // Start codon
+        } else if (codon.equals("TAG") || codon.equals("TAA") || codon.equals("TGA")) {
+            return "Stop"; // Stop codons
+        }
+        for (Aminoacid acid : aminoAcids) {
+            if (acid.getCodons().contains(codon)) {
+                return acid.getSingleLetterAbbreviation();
+            }
+        }
+        return "X"; // if we get an X, something went wrong, but we'll just ignore it for now
     }
 
     private static void menuSelection() {
@@ -90,11 +90,9 @@ public class Main {
                     break;
             }
         } while (choice != 4);
-
-        scanner.close();
     }
 
-    private static void handleReadingFrame(int readingFrame) {
+	private static void handleReadingFrame(int readingFrame) {
         Scanner scanner = new Scanner(System.in);
         int action;
         String filename = String.format("./genomeLabNeededFiles/covidSequenceRF%d.csv", readingFrame);
@@ -118,7 +116,7 @@ public class Main {
                 generateGeneAnalysisReport(readingFrame, filename);
                 break;
             case 4:
-                return; // Just break out of the method to return to the main menu
+                return; //  break out of the method to return to the main menu
             default:
                 System.out.println("Invalid choice. Please select a valid option.");
                 handleReadingFrame(readingFrame); // Recursively call to handle mistakes
@@ -126,7 +124,7 @@ public class Main {
         }
     }
 
-    private static void generateCompleteCodonBiasReport(int readingFrame, String filename) {
+	private static void generateCompleteCodonBiasReport(int readingFrame, String filename) {
 		try {
 			List<String> codons = readCodons(filename);
 			Map<String, Integer> codonCounts = new HashMap<>();
@@ -136,23 +134,20 @@ public class Main {
 	
 			String reportFilename = "CodonBiasReport_RF" + readingFrame + ".txt";
 			try (BufferedWriter writer = new BufferedWriter(new FileWriter(reportFilename))) {
-				for (Aminoacid acid : aminoAcids) {
-					writer.write("Amino Acid: " + acid.getFullName() + " (" + acid.getSingleLetterAbbreviation() + ")\n");
-					for (String codon : acid.getCodons()) {
-						int count = codonCounts.getOrDefault(codon, 0);
-						double percentage = 100.0 * count / codons.size();
-						writer.write(String.format("  %s: %d occurrences, %.2f%%\n", codon, count, percentage));
-					}
-					writer.write("\n");
+				for (Map.Entry<String, Integer> entry : codonCounts.entrySet()) {
+					String codon = entry.getKey();
+					int count = entry.getValue();
+					double percentage = 100.0 * count / codons.size();
+					writer.write(String.format("%s: %d occurrences, %.2f%%\n", codon, count, percentage));
 				}
+				System.out.println("Generated codon bias report: " + reportFilename);
 			}
-			System.out.println("Generated codon bias report: " + reportFilename);
 		} catch (IOException e) {
 			System.err.println("Error generating codon bias report: " + e.getMessage());
 		}
 	}
 	
-    private static void conductSingleAminoAcidAnalysis(Scanner scanner) {
+	private static void conductSingleAminoAcidAnalysis(Scanner scanner) {
 		System.out.print("Enter the single letter representation of the amino acid: ");
 		String aminoAcid = scanner.next().toUpperCase();
 		Aminoacid acid = aminoAcids.stream()
@@ -184,12 +179,11 @@ public class Main {
 		}
 	}
 	
-
-    private static void generateGeneAnalysisReport(int readingFrame, String filename) {
+	private static void generateGeneAnalysisReport(int readingFrame, String filename) {
 		try {
 			List<String> codons = readCodons(filename);
-			findGenes(codons, readingFrame); // Assumes findGenes fills a List<Gene> called 'genes'
-			
+			findGenes(codons, readingFrame);
+	
 			String reportFilename = "GeneAnalysisReport_RF" + readingFrame + ".txt";
 			try (BufferedWriter writer = new BufferedWriter(new FileWriter(reportFilename))) {
 				for (Gene gene : genes) {
@@ -199,8 +193,8 @@ public class Main {
 											   gene.getLength()));
 					writer.write("Amino Acid Sequence: " + gene.getAminoAcidSequence() + "\n\n");
 				}
+				System.out.println("Generated gene analysis report: " + reportFilename);
 			}
-			System.out.println("Generated gene analysis report: " + reportFilename);
 		} catch (IOException e) {
 			System.err.println("Error generating gene analysis report: " + e.getMessage());
 		}
