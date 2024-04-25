@@ -26,21 +26,6 @@ public class Gene {
     public int getLength() {
         return aminoAcidSequence.length();
     }
-
-    public List<int[]> findSubSequencePositions(String subSequence) {
-        List<int[]> positions = new ArrayList<>();
-        int index = aminoAcidSequence.indexOf(subSequence);
-        while (index >= 0) {
-            // Calculate the nucleotide positions considering each amino acid translates to 3 nucleotides.
-            int startPos = startNucleotidePosition + index * 3;
-            int endPos = startPos + subSequence.length() * 3 - 1;
-            positions.add(new int[] {startPos, endPos});
-
-            // Move to the next possible start position
-            index = aminoAcidSequence.indexOf(subSequence, index + 1);
-        }
-        return positions;
-    }
         
     @Override
     public String toString() {

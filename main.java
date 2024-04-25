@@ -1,6 +1,14 @@
 import java.io.*;
 import java.util.*;
 
+/**
+ * Main class for the genome analysis program.
+ * Josh Pablico
+ * COSC-1437.200
+ * Created on Apr. 12th, 2024
+ */
+
+
 public class Main {
 
     private static List<Aminoacid> aminoAcids;
